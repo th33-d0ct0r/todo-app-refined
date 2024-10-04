@@ -12,12 +12,14 @@ export default function Page() {
   const [password, setPassword] = React.useState('')
   const [fName, setFName] = React.useState('')
   const [lName, setLName] = React.useState('')
+  const [error, setError] = React.useState<string | null>(null);
   const [verifying, setVerifying] = React.useState(false)
   const [code, setCode] = React.useState('')
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null);
 
     if (!isLoaded) return
 
@@ -34,7 +36,8 @@ export default function Page() {
 
       setVerifying(true)
     } catch (err: any) {
-      console.error(JSON.stringify(err, null, 2))
+      setError(err.errors[0].message);
+      console.log("me gira hua banda", JSON.stringify(err, null, 2))
     }
   }
 
@@ -49,7 +52,6 @@ export default function Page() {
       })
 
       if (signUpAttempt.status === 'complete') {
-        console.log(signUp)
         await setActive({ session: signUpAttempt.createdSessionId })
 
         fetch('/api/auth/register', {
@@ -59,8 +61,8 @@ export default function Page() {
             },
             body: JSON.stringify({
                 email: emailAddress,
-                clerkId: signUp.id,
-                name: fName + lName,
+                clerkId: signUpAttempt.createdUserId,
+                name: fName + ' ' + lName,
             }),
         })
         .then(response => {
@@ -87,28 +89,28 @@ export default function Page() {
 
   if (verifying) {
     return (
-      <>
-        <h1>Verify your email</h1>
-        <form onSubmit={handleVerify}>
-          <label id="code">Enter your verification code</label>
-          <input value={code} id="code" name="code" onChange={(e) => setCode(e.target.value)} />
-          <button type="submit">Verify</button>
-        </form>
-      </>
+      <div className="flex flex-col items-center justify-center min-h-[100vh]">
+            <h1 className="text-3xl font-bold mb-9 text-[#FF5631]">Verify your email</h1>
+            <form onSubmit={handleVerify} className="flex flex-col space-y-4">
+          <Input name="Enter verification code" value={code} callback={(e) => setCode(e.target.value)} />
+          <button type="submit" className="bg-[#FF5631] text-white p-2 rounded-md">Verify</button>
+          </form>
+      </div>
     )
   }
 
   return (
     <>
       <div className="flex flex-col items-center justify-center min-h-[100vh]">
-            <h1 className="text-3xl font-bold mb-2">Register</h1>
+            <h1 className="text-3xl font-bold mb-2 text-[#FF5631]">Register</h1>
             <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
                 <Input name="First Name" value={fName} callback={(e) => setFName(e.target.value)} />
                 <Input name="Last Name" value={lName} callback={(e) => setLName(e.target.value)} />
                 <Input name="email" value={emailAddress} callback={(e) => setEmailAddress(e.target.value)} />
                 <Input name="password" value={password} callback={(e) => setPassword(e.target.value)} />
-                <button type="submit" className="bg-green-600 text-white p-2 rounded-md">Register</button>
-                <p>Already have an account? <Link className="font-bold text-green-500" href={"/login"}>Login</Link></p>
+                <button type="submit" className="bg-[#FF5631] text-white p-2 rounded-md">Register</button>
+                {error && <p className="text-red-500">{error}</p>}
+                <p>Already have an account? <Link className="font-bold text-[#FF5631]" href={"/sign-in"}>Login</Link></p>
             </form>
         </div>
     </>
