@@ -5,7 +5,12 @@ import Todo from '@/components/Todo';
 import { Notyf } from 'notyf';
 import 'notyf/notyf.min.css';
 import { PacmanLoader } from 'react-spinners';
-import { useRouter } from 'next/navigation';
+
+interface Todo {
+    completed: boolean;
+    createdAt: string;
+    todo: string;
+}
 
 interface User {
     name: string;
@@ -43,15 +48,10 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [todo, setTodo] = useState('')
-    const [todos, setTodos] = useState<object[]>([])
-    const [completedTodos, setCompletedTodos] = useState<object[]>([]);
+    const [todos, setTodos] = useState<Todo[]>([]);
+    const [completedTodos, setCompletedTodos] = useState<Todo[]>([]);
     const notyf = new Notyf();
     const { signOut } = useClerk()
-    const router = useRouter();
-
-    if (!user) {
-        router.push('/sign-in')
-    }
 
     useEffect(() => {
         if (!isLoaded) return;
@@ -64,13 +64,13 @@ export default function Dashboard() {
                 const userData = await fetchUser(user?.id || '');
                 setMongoUser(userData);
                 if (userData) {
-                    setTodos(userData.todos);
+                    setTodos(userData.todos as Todo[]);
                 }
                 if (userData) {
                     for (let i = 0; i < userData.todos.length; i++) {
                         // @ts-ignore
                         if (userData.todos[i].completed) {
-                            setCompletedTodos((prev) => [...prev, userData.todos[i]]);
+                            setCompletedTodos((prev) => [...prev, userData.todos[i] as Todo]);
                         }
                     }
                 }
