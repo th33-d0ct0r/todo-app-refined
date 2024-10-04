@@ -21,12 +21,14 @@ export default function SignInForm() {
     setLoading(true);
 
     try {
+      //@ts-ignore
       const signInAttempt = await signIn.create({
         identifier: email,
         password,
       })
 
       if (signInAttempt.status === 'complete') {
+        // @ts-ignore
         await setActive({ session: signInAttempt.createdSessionId })
         router.push('/dashboard')
       } else {
